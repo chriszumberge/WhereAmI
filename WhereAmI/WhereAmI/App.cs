@@ -27,6 +27,7 @@ namespace WhereAmI
                     VerticalOptions = LayoutOptions.StartAndExpand,
                     Padding = new Thickness(10, 20),
                     Children = {
+                        actIndGettingLocation,
                         lblTimeStamp,
                         lblLocation,
                         lblHeading,
@@ -140,6 +141,7 @@ namespace WhereAmI
                 locator.PositionError += Locator_PositionError;
                 locator.DesiredAccuracy = GetLocatorAccuracy();
                 btnGetLocation.IsEnabled = false;
+                btnToggleLocationUpdates.Text = "Stop Updates";
                 await locator.StartListeningAsync(
                     minTime: GetUpdateInterval(),
                     minDistance: GetMinimumDistance(),
@@ -150,7 +152,7 @@ namespace WhereAmI
             {
                 await locator.StopListeningAsync();
                 btnGetLocation.IsEnabled = true;
-
+                btnToggleLocationUpdates.Text = "Start Updates";
                 // unregister event handler so GC can collect reference
                 locator.PositionChanged -= Locator_PositionChanged;
                 locator.PositionError -= Locator_PositionError;
@@ -172,9 +174,20 @@ namespace WhereAmI
         private async void BtnGetLocation_Clicked(object sender, EventArgs e)
         {
             locator.DesiredAccuracy = GetLocatorAccuracy();
+
+            actIndGettingLocation.IsRunning = true;
+            actIndGettingLocation.IsVisible = true;
+            btnGetLocation.IsEnabled = false;
+            btnToggleLocationUpdates.IsEnabled = false;
+            
             var position = await locator.GetPositionAsync(timeoutMilliseconds: 5000);
 
             UpdateUIWithNewPosition(position);
+
+            actIndGettingLocation.IsRunning = false;
+            actIndGettingLocation.IsVisible = false;
+            btnGetLocation.IsEnabled = true;
+            btnToggleLocationUpdates.IsEnabled = true;
         }
 
         private void UpdateUIWithNewPosition(Position position)
@@ -284,6 +297,12 @@ namespace WhereAmI
             Keyboard = Keyboard.Numeric,
             HorizontalTextAlignment = TextAlignment.Center,
             //HorizontalOptions = LayoutOptions.Center,
+        };
+
+        ActivityIndicator actIndGettingLocation = new ActivityIndicator
+        {
+            IsRunning = false,
+            IsVisible = false
         };
     }
 }
