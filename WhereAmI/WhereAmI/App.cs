@@ -10,12 +10,30 @@ namespace WhereAmI
 {
     public class App : Application
     {
+        IGeolocator locator { get; } = CrossGeolocator.Current;
+        GeofenceManager geofenceManager { get; } = new GeofenceManager();
         bool automaticUpdates { get; set; } = false;
         public App()
         {
             btnGetLocation.Clicked += BtnGetLocation_Clicked;
 
             btnToggleLocationUpdates.Clicked += BtnToggleLocationUpdates_Clicked;
+
+            geofenceManager.OnEnteredGeofence += GeofenceManager_OnEnteredGeofence;
+            geofenceManager.OnExitedGeofence += GeofenceManager_OnExitedGeofence;
+
+            // Todo different screen.. probably a table for this PoC
+            Geofence homeFence = new Geofence("Home", 40.596625, -75.591912, 30);
+            Geofence workFence = new Geofence("Work", "POLYGON((-75.56702256202698 40.60780962922667,-75.56735515594482 40.60706841686434,-75.56759119033813 40.6062213069555,-75.56657195091248 40.60672631607828,-75.56594967842102 40.606986964455075,-75.56629300117493 40.60737793511422,-75.56671142578125 40.60783406465907,-75.56702256202698 40.60780962922667))");
+            Geofence churchRdAndChapmansFence = new Geofence("Homt to Work Checkpoint", 40.607447, -75.572532, 10);
+            Geofence allentownYMCAFence = new Geofence("Allentown YMCA", "POLYGON((-75.48591256141663 40.593485683191474,-75.48546195030212 40.593603813008954,-75.48523128032684 40.59307833739258,-75.48567652702332 40.59295205969104,-75.48591256141663 40.593485683191474))");
+            Geofence tilghmanFence = new Geofence("Tilghman Street LTI to Wegmans", "LINESTRING(-75.57602405548101 40.59273444649959,-75.5604887008667 40.58914967802697,-75.55851459503174 40.58918226769682,-75.55048942565918 40.591430916562736,-75.54040431976318 40.5941683000797)", 7);
+
+            geofenceManager.SubscribeGeofence(homeFence);
+            geofenceManager.SubscribeGeofence(workFence);
+            geofenceManager.SubscribeGeofence(churchRdAndChapmansFence);
+            geofenceManager.SubscribeGeofence(allentownYMCAFence);
+            geofenceManager.SubscribeGeofence(tilghmanFence);
 
             // The root page of your application
             var content = new ContentPage
@@ -96,6 +114,16 @@ namespace WhereAmI
             MainPage = new NavigationPage(content);
         }
 
+        private async void GeofenceManager_OnExitedGeofence(object sender, GeofenceExitedEventArgs e)
+        {
+            await MainPage.DisplayAlert("Entered Geofence!", e.Geofence.Name, "Ok");
+        }
+
+        private async void GeofenceManager_OnEnteredGeofence(object sender, GeofenceEnteredEventArgs e)
+        {
+            await MainPage.DisplayAlert("Exited Geofence!", e.Geofence.Name, "Ok");
+        }
+
         private int GetLocatorAccuracy()
         {
             int accuracy;
@@ -164,6 +192,7 @@ namespace WhereAmI
             var position = e.Position;
 
             UpdateUIWithNewPosition(position);
+            geofenceManager.UpdateGeofences(position);
         }
 
         private void Locator_PositionError(object sender, PositionErrorEventArgs e)
@@ -183,6 +212,7 @@ namespace WhereAmI
             var position = await locator.GetPositionAsync(timeoutMilliseconds: 5000);
 
             UpdateUIWithNewPosition(position);
+            geofenceManager.UpdateGeofences(position);
 
             actIndGettingLocation.IsRunning = false;
             actIndGettingLocation.IsVisible = false;
@@ -255,8 +285,6 @@ namespace WhereAmI
             HorizontalOptions = LayoutOptions.FillAndExpand,
             LineBreakMode = LineBreakMode.WordWrap
         };
-
-        IGeolocator locator { get; } = CrossGeolocator.Current;
 
         Button btnGetLocation = new Button
         {
