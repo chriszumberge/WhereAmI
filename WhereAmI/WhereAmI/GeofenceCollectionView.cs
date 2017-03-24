@@ -61,7 +61,16 @@ namespace WhereAmI
                 cell.ContextActions.Add(deleteAction);
                 cell.Tapped += async (object sender, EventArgs e) =>
                 {
-                    Map geofenceMap = new Map();
+                    DrawableMap geofenceMap = new DrawableMap()
+                    {
+                        MapType = MapType.Hybrid,
+                        DrawableOptions = new GeometryDrawableOptions
+                        {
+                            Alpha = 0.8,
+                            FillColor = Color.Red,
+                            StrokeColor = Color.White
+                        }
+                    };
                     if ((App.Current as App).LatestPosition != null)
                     {
                         geofenceMap.Pins.Add(new Pin()
@@ -71,6 +80,19 @@ namespace WhereAmI
                             Type = PinType.Generic
                         });
                     }
+
+                    // TODO need to figure out how to get geometry coordinates from the tap
+                    geofenceMap.Shapes.Add(new MapShape()
+                    {
+                        ShapeCoordinates =
+                        {
+                            new Position(37.797513, -122.402058),
+                            new Position (37.798433, -122.402256),
+                            new Position (37.798582, -122.401071),
+                            new Position (37.797658, -122.400888)
+                        }
+                    });
+
                     await this.Navigation.PushModalAsync(new ContentPage
                     {
                         Content = geofenceMap

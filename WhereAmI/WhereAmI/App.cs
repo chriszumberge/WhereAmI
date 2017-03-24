@@ -161,7 +161,10 @@ namespace WhereAmI
             {
                 Xamarin.Forms.Maps.Map positionMap = new Xamarin.Forms.Maps.Map(
                     Xamarin.Forms.Maps.MapSpan.FromCenterAndRadius(
-                        new Xamarin.Forms.Maps.Position(latestPosition.Latitude, latestPosition.Longitude), new Xamarin.Forms.Maps.Distance(100)));
+                        new Xamarin.Forms.Maps.Position(latestPosition.Latitude, latestPosition.Longitude), Xamarin.Forms.Maps.Distance.FromMeters(100)))
+                {
+                    MapType = Xamarin.Forms.Maps.MapType.Hybrid
+                };
                 positionMap.Pins.Add(new Xamarin.Forms.Maps.Pin()
                 {
                     Position = new Xamarin.Forms.Maps.Position(latestPosition.Latitude, latestPosition.Longitude),

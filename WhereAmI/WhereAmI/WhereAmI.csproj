@@ -36,6 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="DrawableMap.cs" />
     <Compile Include="GeofenceCollectionView.cs" />
     <Compile Include="GeofenceManager.cs" />
     <Compile Include="GeofenceManagerProvider.cs" />
