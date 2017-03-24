@@ -8,17 +8,12 @@ namespace WhereAmI
 {
     public class GeofenceManager
     {
-        public List<Geofence> Geofences { get; set; } = new List<Geofence>();
+        public List<Geofence> Geofences => mGeofences;
+        List<Geofence> mGeofences { get; set; } = new List<Geofence>();
 
-        public void SubscribeGeofence(Geofence newGeofence)
-        {
-            Geofences.Add(newGeofence);
-        }
+        public void SubscribeGeofence(Geofence newGeofence) => mGeofences.Add(newGeofence);
 
-        public void UnsubscribeGeofence(Geofence geofence)
-        {
-            Geofences.Remove(geofence);
-        }
+        public void UnsubscribeGeofence(Geofence geofence) => mGeofences.Remove(geofence);
 
         public event EventHandler<GeofenceEnteredEventArgs> OnEnteredGeofence;
         public event EventHandler<GeofenceExitedEventArgs> OnExitedGeofence;
@@ -33,18 +28,14 @@ namespace WhereAmI
         {
             Point location = new Point(lng, lat);
 
-            foreach (Geofence geofence in Geofences)
+            foreach (Geofence geofence in mGeofences)
             {
                 if (geofence.Geometry.Contains(location))
                 {
                     if (!geofence.IsInside)
                     {
                         geofence.IsInside = true;
-                        OnEnteredGeofence.Invoke(this, new GeofenceEnteredEventArgs
-                        {
-                            Geofence = geofence,
-                            DateTimeTriggered = triggerTime ?? DateTime.Now
-                        });
+                        OnEnteredGeofence.Invoke(this, new GeofenceEnteredEventArgs(geofence, triggerTime ?? DateTime.Now));
                     }
                 }
                 else
@@ -52,11 +43,7 @@ namespace WhereAmI
                     if (geofence.IsInside)
                     {
                         geofence.IsInside = false;
-                        OnExitedGeofence.Invoke(this, new GeofenceExitedEventArgs
-                        {
-                            Geofence = geofence,
-                            DateTimeTriggered = triggerTime ?? DateTime.Now
-                        });
+                        OnExitedGeofence.Invoke(this, new GeofenceExitedEventArgs(geofence, triggerTime ?? DateTime.Now));
                     }
                 }
             }
@@ -67,10 +54,10 @@ namespace WhereAmI
     public class Geofence
     {
         readonly Polygon mGeometry;
-        public Polygon Geometry { get { return mGeometry; } }
+        public Polygon Geometry => mGeometry;
 
         readonly string mName;
-        public string Name { get { return mName; } }
+        public string Name => mName;
 
         public bool IsInside { get; set; }
 
@@ -149,13 +136,29 @@ namespace WhereAmI
 
     public class GeofenceEnteredEventArgs : EventArgs
     {
-        public Geofence Geofence { get; set; }
-        public DateTime DateTimeTriggered { get; set; }
+        public Geofence Geofence => mGeofence;
+        Geofence mGeofence { get; set; }
+        public DateTime DateTimeEntered => mDateTimeEntered;
+        DateTime mDateTimeEntered { get; set; }
+
+        public GeofenceEnteredEventArgs(Geofence geofence, DateTime dateTimeEntered)
+        {
+            mGeofence = geofence;
+            mDateTimeEntered = dateTimeEntered;
+        }
     }
 
     public class GeofenceExitedEventArgs : EventArgs
     {
-        public Geofence Geofence { get; set; }
-        public DateTime DateTimeTriggered { get; set; }
+        public Geofence Geofence => mGeofence;
+        Geofence mGeofence { get; set; }
+        public DateTime DateTimeExited => mDateTimeExited;
+        DateTime mDateTimeExited { get; set; }
+
+        public GeofenceExitedEventArgs(Geofence geofence, DateTime dateTimeExited)
+        {
+            mGeofence = geofence;
+            mDateTimeExited = dateTimeExited;
+        }
     }
 }

@@ -12,7 +12,7 @@ namespace WhereAmI
     public class App : Application
     {
         IGeolocator locator { get; } = CrossGeolocator.Current;
-        GeofenceManager geofenceManager { get; } = new GeofenceManager();
+        GeofenceManager geofenceManager { get; } = GeofenceManagerProvider.Instance;
         bool automaticUpdates { get; set; } = false;
         public App()
         {
@@ -37,6 +37,7 @@ namespace WhereAmI
             geofenceManager.SubscribeGeofence(churchRdAndChapmansFence);
             geofenceManager.SubscribeGeofence(allentownYMCAFence);
             geofenceManager.SubscribeGeofence(tilghmanFence);
+
 
             mainStack = new StackLayout
             {
@@ -119,7 +120,31 @@ namespace WhereAmI
                 }
             };
 
-            MainPage = new NavigationPage(content);
+            NavigationPage rootPage = new NavigationPage(content);
+            rootPage.ToolbarItems.Add(new ToolbarItem("Fences", String.Empty, async () =>
+            {
+                GeofenceCollectionView geofenceCollectionView = new GeofenceCollectionView();
+                ContentPage geofencesPage = new ContentPage
+                {
+                    Content = geofenceCollectionView,
+                    Title = "Geofences"
+                };
+
+                // Needed if modally presented
+                //geofencesPage.ToolbarItems.Add(new ToolbarItem("Dismiss"), )
+
+                geofencesPage.ToolbarItems.Add(new ToolbarItem("+", String.Empty, async () =>
+                {
+                    await geofencesPage.DisplayAlert("Create Geofence Not Implemented", "Working on it...", "F.U.");
+                }));
+
+                geofencesPage.Appearing += (s, e) => { geofenceCollectionView.RefreshCommand.Execute(null); };
+
+                await rootPage.PushAsync(geofencesPage);
+            }));
+
+
+            MainPage = rootPage;
         }
 
         private void GeofenceManager_OnExitedGeofence(object sender, GeofenceExitedEventArgs e)
@@ -130,7 +155,7 @@ namespace WhereAmI
                 HorizontalTextAlignment = TextAlignment.Start,
                 HorizontalOptions = LayoutOptions.StartAndExpand,
                 LineBreakMode = LineBreakMode.WordWrap,
-                Text = $"Exited geofence {e.Geofence.Name} at {e.DateTimeTriggered}"
+                Text = $"Exited geofence {e.Geofence.Name} at {e.DateTimeExited}"
             });
         }
 
@@ -142,7 +167,7 @@ namespace WhereAmI
                 HorizontalTextAlignment = TextAlignment.Start,
                 HorizontalOptions = LayoutOptions.StartAndExpand,
                 LineBreakMode = LineBreakMode.WordWrap,
-                Text = $"Entered geofence {e.Geofence.Name} at {e.DateTimeTriggered}"
+                Text = $"Entered geofence {e.Geofence.Name} at {e.DateTimeEntered}"
             });
         }
 
