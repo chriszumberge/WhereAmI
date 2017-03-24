@@ -25,7 +25,8 @@ namespace WhereAmI
 
         public void UpdateGeofences(Plugin.Geolocator.Abstractions.Position position)
         {
-            this.UpdateGeofences(position.Latitude, position.Longitude, position.Timestamp.DateTime);
+            this.UpdateGeofences(position.Latitude, position.Longitude, position.Timestamp.LocalDateTime.AddHours(1));
+            //this.UpdateGeofences(position.Latitude, position.Longitude, TimeZoneInfo.ConvertTime(position.Timestamp.LocalDateTime, TimeZoneInfo.Local));
         }
 
         public void UpdateGeofences(double lat, double lng, Nullable<DateTime> triggerTime = null)
@@ -73,6 +74,8 @@ namespace WhereAmI
 
         public bool IsInside { get; set; }
 
+        private double metersToBufferDistanceConversionFactor = 1.0 / 213000;
+
         public Geofence(string name, Polygon geometry)
         {
             mGeometry = geometry;
@@ -104,7 +107,7 @@ namespace WhereAmI
             WKTReader reader = new WKTReader();
             LineString lineString = (LineString)reader.Read(lineStringWellKnownText);
             BufferParameters bufferParameters = new BufferParameters(8, GeoAPI.Operation.Buffer.EndCapStyle.Round, GeoAPI.Operation.Buffer.JoinStyle.Round, 5);
-            mGeometry = (Polygon)lineString.Buffer(bufferDistance / 10000, bufferParameters);
+            mGeometry = (Polygon)lineString.Buffer(bufferDistance * metersToBufferDistanceConversionFactor, bufferParameters);
         }
 
         public Geofence(string name, GeoAPI.Geometries.Coordinate[] polygonBorderCoordinates)
@@ -120,7 +123,7 @@ namespace WhereAmI
 
             Point point = new Point(lng, lat);
             BufferParameters bufferParams = new BufferParameters(16, GeoAPI.Operation.Buffer.EndCapStyle.Round, GeoAPI.Operation.Buffer.JoinStyle.Round, meterRadius);
-            Polygon polygon = (Polygon)point.Buffer(meterRadius / 10000, bufferParams);
+            Polygon polygon = (Polygon)point.Buffer(meterRadius * metersToBufferDistanceConversionFactor, bufferParams);
             mGeometry = polygon;
         }
 
@@ -129,7 +132,7 @@ namespace WhereAmI
             mName = name;
 
             BufferParameters bufferParams = new BufferParameters(16, GeoAPI.Operation.Buffer.EndCapStyle.Round, GeoAPI.Operation.Buffer.JoinStyle.Round, meterRadius);
-            Polygon polygon = (Polygon)location.Buffer(meterRadius / 10000, bufferParams);
+            Polygon polygon = (Polygon)location.Buffer(meterRadius * metersToBufferDistanceConversionFactor, bufferParams);
             mGeometry = polygon;
         }
 
@@ -139,7 +142,7 @@ namespace WhereAmI
 
             Point point = new Point(coordinate.X, coordinate.Y);
             BufferParameters bufferParams = new BufferParameters(16, GeoAPI.Operation.Buffer.EndCapStyle.Round, GeoAPI.Operation.Buffer.JoinStyle.Round, meterRadius);
-            Polygon polygon = (Polygon)point.Buffer(meterRadius / 10000, bufferParams);
+            Polygon polygon = (Polygon)point.Buffer(meterRadius * metersToBufferDistanceConversionFactor, bufferParams);
             mGeometry = polygon;
         }
     }

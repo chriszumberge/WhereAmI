@@ -51,7 +51,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string></string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Get location data for usage in the app</string>
+	<string>Get location data to determine when you pass through key areas.</string>
 	<key>CFBundleName</key>
 	<string>WhereAmI</string>
 </dict>
