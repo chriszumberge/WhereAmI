@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Xamarin.Forms;
 using GeoAPI;
+//using Xamarin.Forms.Maps;
 
 namespace WhereAmI
 {
@@ -21,6 +22,8 @@ namespace WhereAmI
             btnGetLocation.Clicked += BtnGetLocation_Clicked;
 
             btnToggleLocationUpdates.Clicked += BtnToggleLocationUpdates_Clicked;
+
+            btnShowOnMap.Clicked += BtnShowOnMap_Clicked;
 
             geofenceManager.OnEnteredGeofence += GeofenceManager_OnEnteredGeofence;
             geofenceManager.OnExitedGeofence += GeofenceManager_OnExitedGeofence;
@@ -50,6 +53,7 @@ namespace WhereAmI
                     lblLocation,
                     lblHeading,
                     lblAddress,
+                    btnShowOnMap,
                     new StackLayout {
                         Orientation = StackOrientation.Horizontal,
                         HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -147,6 +151,31 @@ namespace WhereAmI
             MainPage = rootPage;
         }
 
+        private async void BtnShowOnMap_Clicked(object sender, EventArgs e)
+        {
+            if (latestPosition == null)
+            {
+                await MainPage.DisplayAlert("No Latest Position", "Try again when location services has located you.", "Ok");
+            }
+            else
+            {
+                Xamarin.Forms.Maps.Map positionMap = new Xamarin.Forms.Maps.Map(
+                    Xamarin.Forms.Maps.MapSpan.FromCenterAndRadius(
+                        new Xamarin.Forms.Maps.Position(latestPosition.Latitude, latestPosition.Longitude), new Xamarin.Forms.Maps.Distance(100)));
+                positionMap.Pins.Add(new Xamarin.Forms.Maps.Pin()
+                {
+                    Position = new Xamarin.Forms.Maps.Position(latestPosition.Latitude, latestPosition.Longitude),
+                    Label = "YOU!",
+                    Type = Xamarin.Forms.Maps.PinType.Generic
+                });
+
+                await MainPage.Navigation.PushModalAsync(new ContentPage
+                {
+                    Content = positionMap
+                });
+            }
+        }
+
         private void GeofenceManager_OnExitedGeofence(object sender, GeofenceExitedEventArgs e)
         {
             //await MainPage.DisplayAlert("Entered Geofence!", e.Geofence.Name, "Ok");
@@ -240,9 +269,14 @@ namespace WhereAmI
             }
         }
 
+        Position latestPosition { get; set; }
+        public Position LatestPosition => latestPosition;
+
         private void Locator_PositionChanged(object sender, PositionEventArgs e)
         {
             var position = e.Position;
+
+            latestPosition = position;
 
             UpdateUIWithNewPosition(position);
             geofenceManager.UpdateGeofences(position);
@@ -263,6 +297,7 @@ namespace WhereAmI
             btnToggleLocationUpdates.IsEnabled = false;
 
             var position = await locator.GetPositionAsync(timeoutMilliseconds: 5000);
+            latestPosition = position;
 
             UpdateUIWithNewPosition(position);
             geofenceManager.UpdateGeofences(position);
@@ -340,6 +375,12 @@ namespace WhereAmI
             HorizontalTextAlignment = TextAlignment.Center,
             HorizontalOptions = LayoutOptions.FillAndExpand,
             LineBreakMode = LineBreakMode.WordWrap
+        };
+
+        Button btnShowOnMap = new Button
+        {
+            Text = "Show On Map",
+            HorizontalOptions = LayoutOptions.FillAndExpand
         };
 
         Button btnGetLocation = new Button

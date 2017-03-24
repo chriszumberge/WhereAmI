@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
+using Xamarin.Forms.Maps;
 
 namespace WhereAmI
 {
@@ -58,6 +59,24 @@ namespace WhereAmI
                 };
 
                 cell.ContextActions.Add(deleteAction);
+                cell.Tapped += async (object sender, EventArgs e) =>
+                {
+                    Map geofenceMap = new Map();
+                    if ((App.Current as App).LatestPosition != null)
+                    {
+                        geofenceMap.Pins.Add(new Pin()
+                        {
+                            Position = new Position((App.Current as App).LatestPosition.Latitude, (App.Current as App).LatestPosition.Longitude),
+                            Label = "YOU!",
+                            Type = PinType.Generic
+                        });
+                    }
+                    await this.Navigation.PushModalAsync(new ContentPage
+                    {
+                        Content = geofenceMap
+                    });
+                };
+
                 return cell;
             });
         }
