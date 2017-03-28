@@ -125,7 +125,7 @@ namespace WhereAmI
             };
 
             NavigationPage rootPage = new NavigationPage(content);
-            rootPage.ToolbarItems.Add(new ToolbarItem("Fences", String.Empty, async () =>
+            content.ToolbarItems.Add(new ToolbarItem("Fences", String.Empty, async () =>
             {
                 GeofenceCollectionView geofenceCollectionView = new GeofenceCollectionView();
                 ContentPage geofencesPage = new ContentPage
@@ -163,7 +163,7 @@ namespace WhereAmI
                     Xamarin.Forms.Maps.MapSpan.FromCenterAndRadius(
                         new Xamarin.Forms.Maps.Position(latestPosition.Latitude, latestPosition.Longitude), Xamarin.Forms.Maps.Distance.FromMeters(100)))
                 {
-                    MapType = Xamarin.Forms.Maps.MapType.Hybrid
+                    MapType = Xamarin.Forms.Maps.MapType.Hybrid,
                 };
                 positionMap.Pins.Add(new Xamarin.Forms.Maps.Pin()
                 {
@@ -172,9 +172,10 @@ namespace WhereAmI
                     Type = Xamarin.Forms.Maps.PinType.Generic
                 });
 
-                await MainPage.Navigation.PushModalAsync(new ContentPage
+                await MainPage.Navigation.PushAsync(new ContentPage
                 {
-                    Content = positionMap
+                    Content = positionMap,
+                    Title = "Map"
                 });
             }
         }

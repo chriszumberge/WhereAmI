@@ -17,6 +17,8 @@ namespace WhereAmI
 
         public GeofenceCollectionView()
         {
+            this.Geofences = new ObservableCollection<Geofence>(manager.Geofences);
+
             this.ItemsSource = this.Geofences;
 
             this.IsPullToRefreshEnabled = true;
@@ -35,7 +37,7 @@ namespace WhereAmI
                 lblName.SetBinding(Label.TextProperty, "Name");
 
                 StackLayout layout = new StackLayout();
-                layout.SetBinding(StackLayout.BackgroundColorProperty, (Geofence geofence) => geofence.IsInside ? Color.Green.MultiplyAlpha(0.5) : Color.Red.MultiplyAlpha(0.5));
+                //layout.SetBinding(StackLayout.BackgroundColorProperty, (Geofence geofence) => geofence.IsInside ? Color.Green.MultiplyAlpha(0.5) : Color.Red.MultiplyAlpha(0.5));
 
                 ViewCell cell = new ViewCell
                 {
@@ -61,14 +63,27 @@ namespace WhereAmI
                 cell.ContextActions.Add(deleteAction);
                 cell.Tapped += async (object sender, EventArgs e) =>
                 {
-                    DrawableMap geofenceMap = new DrawableMap()
+                    Geofence selectedGeofence = ((sender as ViewCell).BindingContext as Geofence);
+
+                    double x1 = selectedGeofence.Geometry.Coordinates.Min(c => c.X);
+                    double y1 = selectedGeofence.Geometry.Coordinates.Min(c => c.Y);
+                    double x2 = selectedGeofence.Geometry.Coordinates.Max(c => c.X);
+                    double y2 = selectedGeofence.Geometry.Coordinates.Max(c => c.Y);
+
+                    double centerX = x1 + ((x2 - x1) / 2);
+                    double centerY = y1 + ((y2 - y1) / 2);
+                    double radius = Math.Max(Math.Abs(x1 - x2), Math.Abs(y1 - y2));
+
+                    DrawableMap geofenceMap = new DrawableMap(MapSpan.FromCenterAndRadius(new Position(centerY, centerX),
+                                                                                          Distance.FromMeters((radius / 0.0000089987) + 100)))
                     {
                         MapType = MapType.Hybrid,
                         DrawableOptions = new GeometryDrawableOptions
                         {
                             Alpha = 0.8,
                             FillColor = Color.Red,
-                            StrokeColor = Color.White
+                            StrokeColor = Color.White,
+                            LineWidth = 1
                         }
                     };
                     if ((App.Current as App).LatestPosition != null)
@@ -84,23 +99,21 @@ namespace WhereAmI
                     // TODO need to figure out how to get geometry coordinates from the tap
                     geofenceMap.Shapes.Add(new MapShape()
                     {
-                        ShapeCoordinates =
-                        {
-                            new Position(37.797513, -122.402058),
-                            new Position (37.798433, -122.402256),
-                            new Position (37.798582, -122.401071),
-                            new Position (37.797658, -122.400888)
-                        }
+                        ShapeCoordinates = 
+                            selectedGeofence.Geometry.Coordinates.Select((GeoAPI.Geometries.Coordinate arg) => new Position(arg.Y, arg.X)).ToList()
                     });
 
-                    await this.Navigation.PushModalAsync(new ContentPage
+                    await this.Navigation.PushAsync(new ContentPage
                     {
-                        Content = geofenceMap
+                        Content = geofenceMap,
+                        Title = selectedGeofence.Name
                     });
                 };
 
                 return cell;
             });
+
+            this.RefreshCommand.Execute(null);
         }
     }
 }

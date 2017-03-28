@@ -17,6 +17,11 @@ namespace WhereAmI
         {
 
         }
+
+        public DrawableMap(MapSpan mapSpan) : base(mapSpan)
+        {
+            
+        }
     }
 
     public class MapShape
