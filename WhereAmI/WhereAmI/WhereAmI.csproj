@@ -41,6 +41,8 @@
     <Compile Include="GeofenceManager.cs" />
     <Compile Include="GeofenceManagerProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TollboothGeofence.cs" />
+    <Compile Include="RouteGeofence.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="GeoAPI, Version=1.7.4.0, Culture=neutral, PublicKeyToken=a1a0da7def465678, processorArchitecture=MSIL">

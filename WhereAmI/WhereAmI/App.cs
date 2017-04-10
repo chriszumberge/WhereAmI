@@ -180,28 +180,50 @@ namespace WhereAmI
             }
         }
 
+        TollboothGeofence lastEnteredTollBooth { get; set; } = null;
+        RouteGeofence currentRoute { get; set; } = null;
+
         private void GeofenceManager_OnExitedGeofence(object sender, GeofenceExitedEventArgs e)
         {
             //await MainPage.DisplayAlert("Entered Geofence!", e.Geofence.Name, "Ok");
-            mainStack.Children.Add(new Label
+            //mainStack.Children.Add(new Label
+            //{
+            //    HorizontalTextAlignment = TextAlignment.Start,
+            //    HorizontalOptions = LayoutOptions.StartAndExpand,
+            //    LineBreakMode = LineBreakMode.WordWrap,
+            //    Text = $"Exited geofence {e.Geofence.Name} at {e.DateTimeExited}"
+            //});
+            if (e.Geofence is TollboothGeofence)
             {
-                HorizontalTextAlignment = TextAlignment.Start,
-                HorizontalOptions = LayoutOptions.StartAndExpand,
-                LineBreakMode = LineBreakMode.WordWrap,
-                Text = $"Exited geofence {e.Geofence.Name} at {e.DateTimeExited}"
-            });
+
+            }
+            else if (e.Geofence is RouteGeofence)
+            {
+
+            }
         }
 
         private void GeofenceManager_OnEnteredGeofence(object sender, GeofenceEnteredEventArgs e)
         {
             //await MainPage.DisplayAlert("Exited Geofence!", e.Geofence.Name, "Ok");
-            mainStack.Children.Add(new Label
+            //mainStack.Children.Add(new Label
+            //{
+            //    HorizontalTextAlignment = TextAlignment.Start,
+            //    HorizontalOptions = LayoutOptions.StartAndExpand,
+            //    LineBreakMode = LineBreakMode.WordWrap,
+            //    Text = $"Entered geofence {e.Geofence.Name} at {e.DateTimeEntered}"
+            //});
+            if (e.Geofence is TollboothGeofence)
             {
-                HorizontalTextAlignment = TextAlignment.Start,
-                HorizontalOptions = LayoutOptions.StartAndExpand,
-                LineBreakMode = LineBreakMode.WordWrap,
-                Text = $"Entered geofence {e.Geofence.Name} at {e.DateTimeEntered}"
-            });
+                lastEnteredTollBooth = e.Geofence as TollboothGeofence;
+            }
+            else if (e.Geofence is RouteGeofence)
+            {
+                if (lastEnteredTollBooth != null)
+                {
+                    currentRoute = e.Geofence as RouteGeofence;
+                }
+            }
         }
 
         private int GetLocatorAccuracy()
