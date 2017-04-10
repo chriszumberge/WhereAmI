@@ -29,18 +29,35 @@ namespace WhereAmI
             geofenceManager.OnExitedGeofence += GeofenceManager_OnExitedGeofence;
 
             // Todo different screen.. probably a table for this PoC
-            Geofence homeFence = new Geofence("Home", 40.596625, -75.591912, 50);
-            Geofence workFence = new Geofence("Work", "POLYGON((-75.56702256202698 40.60780962922667,-75.56735515594482 40.60706841686434,-75.56759119033813 40.6062213069555,-75.56657195091248 40.60672631607828,-75.56594967842102 40.606986964455075,-75.56629300117493 40.60737793511422,-75.56671142578125 40.60783406465907,-75.56702256202698 40.60780962922667))");
-            Geofence churchRdAndChapmansFence = new Geofence("Home to Work Checkpoint", 40.607447, -75.572532, 10);
-            Geofence allentownYMCAFence = new Geofence("Allentown YMCA", "POLYGON((-75.48591256141663 40.593485683191474,-75.48546195030212 40.593603813008954,-75.48523128032684 40.59307833739258,-75.48567652702332 40.59295205969104,-75.48591256141663 40.593485683191474))");
-            Geofence tilghmanFence = new Geofence("Tilghman Street From LTI to Wegmans", "LINESTRING(-75.57602405548101 40.59273444649959,-75.5604887008667 40.58914967802697,-75.55851459503174 40.58918226769682,-75.55048942565918 40.591430916562736,-75.54040431976318 40.5941683000797)", 20);
+            //Geofence homeFence = new Geofence("Home", 40.596625, -75.591912, 50);
+            //Geofence workFence = new Geofence("Work", "POLYGON((-75.56702256202698 40.60780962922667,-75.56735515594482 40.60706841686434,-75.56759119033813 40.6062213069555,-75.56657195091248 40.60672631607828,-75.56594967842102 40.606986964455075,-75.56629300117493 40.60737793511422,-75.56671142578125 40.60783406465907,-75.56702256202698 40.60780962922667))");
+            //Geofence churchRdAndChapmansFence = new Geofence("Home to Work Checkpoint", 40.607447, -75.572532, 10);
+            //Geofence allentownYMCAFence = new Geofence("Allentown YMCA", "POLYGON((-75.48591256141663 40.593485683191474,-75.48546195030212 40.593603813008954,-75.48523128032684 40.59307833739258,-75.48567652702332 40.59295205969104,-75.48591256141663 40.593485683191474))");
+            //Geofence tilghmanFence = new Geofence("Tilghman Street From LTI to Wegmans", "LINESTRING(-75.57602405548101 40.59273444649959,-75.5604887008667 40.58914967802697,-75.55851459503174 40.58918226769682,-75.55048942565918 40.591430916562736,-75.54040431976318 40.5941683000797)", 20);
 
-            geofenceManager.SubscribeGeofence(homeFence);
-            geofenceManager.SubscribeGeofence(workFence);
-            geofenceManager.SubscribeGeofence(churchRdAndChapmansFence);
-            geofenceManager.SubscribeGeofence(allentownYMCAFence);
-            geofenceManager.SubscribeGeofence(tilghmanFence);
+            //geofenceManager.SubscribeGeofence(homeFence);
+            //geofenceManager.SubscribeGeofence(workFence);
+            //geofenceManager.SubscribeGeofence(churchRdAndChapmansFence);
+            //geofenceManager.SubscribeGeofence(allentownYMCAFence);
+            //geofenceManager.SubscribeGeofence(tilghmanFence);
 
+            geofenceManager.SubscribeGeofence(new Geofence("Old U.S. 22/Tilghman Street", "LINESTRING(-75.63256502151489 40.583270292645814,-75.62968969345093 40.58387325197076,-75.62299489974976 40.58516063341827,-75.61393976211548 40.586985739332,-75.60361862182617 40.58918557758428,-75.5944561958313 40.59094539608536,-75.5893063545227 40.59192305301892,-75.58518648147583 40.59270516827414,-75.58329820632935 40.59298216523328,-75.5811095237732 40.59312881021768,-75.57900667190552 40.59309622247117,-75.57701110839844 40.592949577415276,-75.57471513748169 40.59260740436753,-75.5670976638794 40.590733568532386,-75.56078910827637 40.58925075687317,-75.55967330932617 40.58915298791604,-75.55870771408081 40.58921816723667,-75.55750608444214 40.58942999958997,-75.55413722991943 40.59032620596762,-75.54830074310303 40.591988229639604,-75.54461002349854 40.593047340821606,-75.54040431976318 40.59413902248207,-75.52789449691772 40.59759318135387)", 10));
+            geofenceManager.SubscribeGeofence(new Geofence("Church Street", 40.58326545469004, -75.63260793685913, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Nursery Street", 40.58386026599528, -75.62973260879517, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Route 100", 40.58449581195547, -75.62643885612488, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Snowdrift Road", 40.58758382751916, -75.6109356880188, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Farm Bureau Road", 40.58983253013347, -75.60011029243469, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Blue Barn Road", 40.59191006860644, -75.58931708335876, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Broadway", 40.589188887471586, -75.56073546409607, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Hausman Road", 40.58940886730601, -75.55749535560608, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Rt 309 S", 40.589588109599035, -75.55518865585327, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Rt 309 N", 40.59016657008576, -75.55306434631348, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Rt 309 S", 40.59058208086843, -75.55538177490234, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Rt 309 N", 40.59117682710392, -75.55326819419861, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Parkway Road", 40.59162492008865, -75.549556016922, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("N 40th Street", 40.593001768834874, -75.54455637931824, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("Springhouse Road", 40.594150478934836, -75.54040431976318, 15));
+            geofenceManager.SubscribeGeofence(new Geofence("N Cedar Crest Blvd", 40.597596490824984, -75.52785158157349, 15));
 
             mainStack = new StackLayout
             {
@@ -195,11 +212,24 @@ namespace WhereAmI
             //});
             if (e.Geofence is TollboothGeofence)
             {
-
+                //lastEnteredTollBooth = e.Geofence as TollboothGeofence;
+                lastEnteredTollBooth = null;
             }
             else if (e.Geofence is RouteGeofence)
             {
-
+                if (e.Geofence == currentRoute)
+                {
+                    if (e.Geofence == null)
+                    {
+                        AddMessageToUI($"Got off {currentRoute.Name} via unspecified exit at ({LatestPosition.Latitude}, {LatestPosition.Longitude})");
+                    }
+                    else
+                    {
+                        AddMessageToUI($"Got off {currentRoute.Name} via the {lastEnteredTollBooth.Name} exit.");
+                    }
+                    currentRoute = null;
+                    lastEnteredTollBooth = null;
+                }
             }
         }
 
@@ -222,8 +252,23 @@ namespace WhereAmI
                 if (lastEnteredTollBooth != null)
                 {
                     currentRoute = e.Geofence as RouteGeofence;
+                    AddMessageToUI($"Got on {currentRoute.Name} via the {lastEnteredTollBooth.Name} exit.");
                 }
             }
+        }
+
+        private void AddMessageToUI(string message)
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                mainStack.Children.Add(new Label
+                {
+                    HorizontalTextAlignment = TextAlignment.Start,
+                    HorizontalOptions = LayoutOptions.StartAndExpand,
+                    LineBreakMode = LineBreakMode.WordWrap,
+                    Text = message
+                });
+            });
         }
 
         private int GetLocatorAccuracy()
