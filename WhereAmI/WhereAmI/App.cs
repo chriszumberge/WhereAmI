@@ -15,6 +15,7 @@ namespace WhereAmI
         IGeolocator locator { get; } = CrossGeolocator.Current;
         GeofenceManager geofenceManager { get; } = GeofenceManagerProvider.Instance;
         bool automaticUpdates { get; set; } = false;
+        FixedSizeQueue<Position> lastFivePositions { get; set; } = new FixedSizeQueue<Position>(5);
         public App()
         {
             GeoAPI.NetTopologySuiteBootstrapper.Bootstrap();
@@ -269,6 +270,32 @@ namespace WhereAmI
             catch (Exception ex)
             {
                 string msg = $"Excepted On Entered Geofence {Environment.NewLine}{ex}";
+
+                var applicationState = GetApplicationState();
+                if (applicationState != null)
+                {
+                    try
+                    {
+                        var appStateString = applicationState.PrintState();
+                        if (!String.IsNullOrEmpty(appStateString))
+                        {
+                            msg = String.Concat(msg, Environment.NewLine, "Application State for Debugging:", Environment.NewLine, appStateString);
+                        }
+                        else
+                        {
+                            msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
+                        }
+                    }
+                    catch
+                    {
+                        msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
+                    }
+                }
+                else
+                {
+                    msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
+                }
+
                 AddMessageToUI(msg, Color.Red);
             }
         }
@@ -309,7 +336,34 @@ namespace WhereAmI
             }
             catch (Exception ex)
             {
-                string msg = $"Excepted On Exited Geofence {Environment.NewLine}{ex}";
+                
+                string msg = $"Excepted On Exited Geofence {Environment.NewLine}{ex}{Environment.NewLine}";
+
+                var applicationState = GetApplicationState();
+                if (applicationState != null)
+                {
+                    try
+                    {
+                        var appStateString = applicationState.PrintState();
+                        if (!String.IsNullOrEmpty(appStateString))
+                        {
+                            msg = String.Concat(msg, Environment.NewLine, "Application State for Debugging:", Environment.NewLine, appStateString);
+                        }
+                        else
+                        {
+                            msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
+                        }
+                    }
+                    catch
+                    {
+                        msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
+                    }
+                }
+                else
+                {
+                    msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
+                }
+
                 AddMessageToUI(msg, Color.Red);
             }
         }
@@ -336,6 +390,24 @@ namespace WhereAmI
                 });
             }
             catch { }
+        }
+
+        private ApplicationState GetApplicationState()
+        {
+            ApplicationState appState = null;
+            try
+            {
+                appState = new ApplicationState
+                {
+                    LastFivePositions = lastFivePositions.ToList(),
+                    LatestPosition = latestPosition,
+                    LastEnteredTollBooth = lastEnteredTollBooth,
+                    CurrentRoute = currentRoute
+                };
+            }
+            catch
+            { }
+            return appState;
         }
 
         private int GetLocatorAccuracy()
@@ -426,6 +498,12 @@ namespace WhereAmI
 
                 latestPosition = position;
 
+                try
+                {
+                    lastFivePositions.Enqueue(latestPosition);
+                }
+                catch { }
+
                 UpdateUIWithNewPosition(position);
                 geofenceManager.UpdateGeofences(position);
             }
@@ -456,6 +534,12 @@ namespace WhereAmI
 
                 var position = await locator.GetPositionAsync(timeoutMilliseconds: 5000);
                 latestPosition = position;
+
+                try
+                {
+                    lastFivePositions.Enqueue(latestPosition);
+                }
+                catch { }
 
                 UpdateUIWithNewPosition(position);
                 geofenceManager.UpdateGeofences(position);
