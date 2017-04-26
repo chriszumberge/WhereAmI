@@ -269,6 +269,7 @@ namespace WhereAmI
                 {
                     AddMessageToUI($"Entered geofence {e.Geofence.Name} at {e.DateTimeEntered}");
                 }
+            }
             catch (Exception ex)
             {
                 string msg = $"Excepted On Entered Geofence {Environment.NewLine}{ex}";
