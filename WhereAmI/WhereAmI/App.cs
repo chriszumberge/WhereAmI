@@ -165,7 +165,8 @@ namespace WhereAmI
                 Title = "WhereAmI",
                 Content = new ScrollView
                 {
-                    Content = mainStack
+                    Content = mainStack,
+                    Orientation = ScrollOrientation.Vertical
                 }
             };
 
@@ -198,30 +199,38 @@ namespace WhereAmI
 
         private async void BtnShowOnMap_Clicked(object sender, EventArgs e)
         {
-            if (latestPosition == null)
+            try
             {
-                await MainPage.DisplayAlert("No Latest Position", "Try again when location services has located you.", "Ok");
-            }
-            else
-            {
-                Xamarin.Forms.Maps.Map positionMap = new Xamarin.Forms.Maps.Map(
-                    Xamarin.Forms.Maps.MapSpan.FromCenterAndRadius(
-                        new Xamarin.Forms.Maps.Position(latestPosition.Latitude, latestPosition.Longitude), Xamarin.Forms.Maps.Distance.FromMeters(100)))
+                if (latestPosition == null)
                 {
-                    MapType = Xamarin.Forms.Maps.MapType.Hybrid,
-                };
-                positionMap.Pins.Add(new Xamarin.Forms.Maps.Pin()
+                    await MainPage.DisplayAlert("No Latest Position", "Try again when location services has located you.", "Ok");
+                }
+                else
                 {
-                    Position = new Xamarin.Forms.Maps.Position(latestPosition.Latitude, latestPosition.Longitude),
-                    Label = "YOU!",
-                    Type = Xamarin.Forms.Maps.PinType.Generic
-                });
+                    Xamarin.Forms.Maps.Map positionMap = new Xamarin.Forms.Maps.Map(
+                        Xamarin.Forms.Maps.MapSpan.FromCenterAndRadius(
+                            new Xamarin.Forms.Maps.Position(latestPosition.Latitude, latestPosition.Longitude), Xamarin.Forms.Maps.Distance.FromMeters(100)))
+                    {
+                        MapType = Xamarin.Forms.Maps.MapType.Hybrid,
+                    };
+                    positionMap.Pins.Add(new Xamarin.Forms.Maps.Pin()
+                    {
+                        Position = new Xamarin.Forms.Maps.Position(latestPosition.Latitude, latestPosition.Longitude),
+                        Label = "YOU!",
+                        Type = Xamarin.Forms.Maps.PinType.Generic
+                    });
 
-                await MainPage.Navigation.PushAsync(new ContentPage
-                {
-                    Content = positionMap,
-                    Title = "Map"
-                });
+                    await MainPage.Navigation.PushAsync(new ContentPage
+                    {
+                        Content = positionMap,
+                        Title = "Map"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = $"Excepted Showing Position on Map {Environment.NewLine}{ex}";
+                AddMessageToUI(msg, Color.Red);
             }
         }
 
@@ -238,25 +247,32 @@ namespace WhereAmI
             //    LineBreakMode = LineBreakMode.WordWrap,
             //    Text = $"Entered geofence {e.Geofence.Name} at {e.DateTimeEntered}"
             //});
-            if (e.Geofence is TollboothGeofence)
+            try
             {
-                lastEnteredTollBooth = e.Geofence as TollboothGeofence;
-            }
-            else if (e.Geofence is RouteGeofence)
-            {
-                // handle crossing over routes
-                if (currentRoute == null)
+                if (e.Geofence is TollboothGeofence)
                 {
-                    if (lastEnteredTollBooth != null)
+                    lastEnteredTollBooth = e.Geofence as TollboothGeofence;
+                }
+                else if (e.Geofence is RouteGeofence)
+                {
+                    // handle crossing over routes
+                    if (currentRoute == null)
                     {
-                        currentRoute = e.Geofence as RouteGeofence;
-                        AddMessageToUI($"Got on {currentRoute.Name} via the {lastEnteredTollBooth.Name} exit.");
+                        if (lastEnteredTollBooth != null)
+                        {
+                            currentRoute = e.Geofence as RouteGeofence;
+                            AddMessageToUI($"Got on {currentRoute.Name} via the {lastEnteredTollBooth.Name} exit.");
+                        }
                     }
                 }
-            }
-            else
+                else
+                {
+                    AddMessageToUI($"Entered geofence {e.Geofence.Name} at {e.DateTimeEntered}");
+                }
+            catch (Exception ex)
             {
-                AddMessageToUI($"Entered geofence {e.Geofence.Name} at {e.DateTimeEntered}");
+                string msg = $"Excepted On Entered Geofence {Environment.NewLine}{ex}";
+                AddMessageToUI(msg, Color.Red);
             }
         }
 
@@ -270,45 +286,63 @@ namespace WhereAmI
             //    LineBreakMode = LineBreakMode.WordWrap,
             //    Text = $"Exited geofence {e.Geofence.Name} at {e.DateTimeExited}"
             //});
-            if (e.Geofence is TollboothGeofence)
+            try
             {
-                //lastEnteredTollBooth = e.Geofence as TollboothGeofence;
-                lastEnteredTollBooth = null;
-            }
-            else if (e.Geofence is RouteGeofence)
-            {
-                if (e.Geofence == currentRoute)
+                if (e.Geofence is TollboothGeofence)
                 {
-                    if (e.Geofence == null)
-                    {
-                        AddMessageToUI($"Got off {currentRoute.Name} via unspecified exit at ({LatestPosition.Latitude}, {LatestPosition.Longitude})");
-                    }
-                    else
-                    {
-                        AddMessageToUI($"Got off {currentRoute.Name} via the {lastEnteredTollBooth.Name} exit.");
-                    }
-                    currentRoute = null;
+                    //lastEnteredTollBooth = e.Geofence as TollboothGeofence;
                     lastEnteredTollBooth = null;
                 }
+                else if (e.Geofence is RouteGeofence)
+                {
+                    if (e.Geofence == currentRoute)
+                    {
+                        if (e.Geofence == null)
+                        {
+                            AddMessageToUI($"Got off {currentRoute.Name} via unspecified exit at ({LatestPosition.Latitude}, {LatestPosition.Longitude})");
+                        }
+                        else
+                        {
+                            AddMessageToUI($"Got off {currentRoute.Name} via the {lastEnteredTollBooth.Name} exit.");
+                        }
+                        currentRoute = null;
+                        lastEnteredTollBooth = null;
+                    }
+                }
+                else
+                {
+                    AddMessageToUI($"Exited geofence {e.Geofence.Name} at {e.DateTimeExited}");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                AddMessageToUI($"Exited geofence {e.Geofence.Name} at {e.DateTimeExited}");
+                string msg = $"Excepted On Exited Geofence {Environment.NewLine}{ex}";
+                AddMessageToUI(msg, Color.Red);
             }
         }
 
         private void AddMessageToUI(string message)
         {
-            Device.BeginInvokeOnMainThread(() =>
+            AddMessageToUI(message, Color.Black);
+        }
+
+        private void AddMessageToUI(string message, Color textColor)
+        {
+            try
             {
-                mainStack.Children.Add(new Label
+                Device.BeginInvokeOnMainThread(() =>
                 {
-                    HorizontalTextAlignment = TextAlignment.Start,
-                    HorizontalOptions = LayoutOptions.StartAndExpand,
-                    LineBreakMode = LineBreakMode.WordWrap,
-                    Text = message
+                    mainStack.Children.Add(new Label
+                    {
+                        HorizontalTextAlignment = TextAlignment.Start,
+                        HorizontalOptions = LayoutOptions.StartAndExpand,
+                        LineBreakMode = LineBreakMode.WordWrap,
+                        Text = message,
+                        TextColor = textColor
+                    });
                 });
-            });
+            }
+            catch { }
         }
 
         private int GetLocatorAccuracy()
@@ -347,36 +381,44 @@ namespace WhereAmI
 
         private async void BtnToggleLocationUpdates_Clicked(object sender, EventArgs e)
         {
-            automaticUpdates = !automaticUpdates;
+            try
+            {
+                automaticUpdates = !automaticUpdates;
 
-            // Automatically updating
-            if (automaticUpdates)
-            {
-                locator.PositionChanged += Locator_PositionChanged;
-                locator.PositionError += Locator_PositionError;
-                locator.DesiredAccuracy = GetLocatorAccuracy();
-                btnGetLocation.IsEnabled = false;
-                entryUpdateInterval.IsEnabled = false;
-                entryMinimumDistance.IsEnabled = false;
-                entryDesiredAccuracy.IsEnabled = false;
-                btnToggleLocationUpdates.Text = "Stop Updates";
-                await locator.StartListeningAsync(
-                    minTime: GetUpdateInterval(),
-                    minDistance: GetMinimumDistance(),
-                    includeHeading: true);
+                // Automatically updating
+                if (automaticUpdates)
+                {
+                    locator.PositionChanged += Locator_PositionChanged;
+                    locator.PositionError += Locator_PositionError;
+                    locator.DesiredAccuracy = GetLocatorAccuracy();
+                    btnGetLocation.IsEnabled = false;
+                    entryUpdateInterval.IsEnabled = false;
+                    entryMinimumDistance.IsEnabled = false;
+                    entryDesiredAccuracy.IsEnabled = false;
+                    btnToggleLocationUpdates.Text = "Stop Updates";
+                    await locator.StartListeningAsync(
+                        minTime: GetUpdateInterval(),
+                        minDistance: GetMinimumDistance(),
+                        includeHeading: true);
+                }
+                // Not automatically updating
+                else
+                {
+                    await locator.StopListeningAsync();
+                    btnGetLocation.IsEnabled = true;
+                    entryUpdateInterval.IsEnabled = true;
+                    entryMinimumDistance.IsEnabled = true;
+                    entryDesiredAccuracy.IsEnabled = true;
+                    btnToggleLocationUpdates.Text = "Start Updates";
+                    // unregister event handler so GC can collect reference
+                    locator.PositionChanged -= Locator_PositionChanged;
+                    locator.PositionError -= Locator_PositionError;
+                }
             }
-            // Not automatically updating
-            else
+            catch (Exception ex)
             {
-                await locator.StopListeningAsync();
-                btnGetLocation.IsEnabled = true;
-                entryUpdateInterval.IsEnabled = true;
-                entryMinimumDistance.IsEnabled = true;
-                entryDesiredAccuracy.IsEnabled = true;
-                btnToggleLocationUpdates.Text = "Start Updates";
-                // unregister event handler so GC can collect reference
-                locator.PositionChanged -= Locator_PositionChanged;
-                locator.PositionError -= Locator_PositionError;
+                string msg = $"Excepted Toggling Location Updates {Environment.NewLine}{ex}";
+                AddMessageToUI(msg, Color.Red);
             }
         }
 
@@ -385,38 +427,56 @@ namespace WhereAmI
 
         private void Locator_PositionChanged(object sender, PositionEventArgs e)
         {
-            var position = e.Position;
+            try
+            {
+                var position = e.Position;
 
-            latestPosition = position;
+                latestPosition = position;
 
-            UpdateUIWithNewPosition(position);
-            geofenceManager.UpdateGeofences(position);
+                UpdateUIWithNewPosition(position);
+                geofenceManager.UpdateGeofences(position);
+            }
+            catch (Exception ex)
+            {
+                string msg = $"Excepted On Locator Position Changed {Environment.NewLine}{ex}";
+                AddMessageToUI(msg, Color.Red);
+            }
         }
 
         private void Locator_PositionError(object sender, PositionErrorEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine(e.Error);
+            //System.Diagnostics.Debug.WriteLine(e.Error);
+            string msg = $"Locator Position Error {Environment.NewLine}{e.Error}";
+            AddMessageToUI(msg, Color.Red);
         }
 
         private async void BtnGetLocation_Clicked(object sender, EventArgs e)
         {
-            locator.DesiredAccuracy = GetLocatorAccuracy();
+            try
+            {
+                locator.DesiredAccuracy = GetLocatorAccuracy();
 
-            actIndGettingLocation.IsRunning = true;
-            actIndGettingLocation.IsVisible = true;
-            btnGetLocation.IsEnabled = false;
-            btnToggleLocationUpdates.IsEnabled = false;
+                actIndGettingLocation.IsRunning = true;
+                actIndGettingLocation.IsVisible = true;
+                btnGetLocation.IsEnabled = false;
+                btnToggleLocationUpdates.IsEnabled = false;
 
-            var position = await locator.GetPositionAsync(timeoutMilliseconds: 5000);
-            latestPosition = position;
+                var position = await locator.GetPositionAsync(timeoutMilliseconds: 5000);
+                latestPosition = position;
 
-            UpdateUIWithNewPosition(position);
-            geofenceManager.UpdateGeofences(position);
+                UpdateUIWithNewPosition(position);
+                geofenceManager.UpdateGeofences(position);
 
-            actIndGettingLocation.IsRunning = false;
-            actIndGettingLocation.IsVisible = false;
-            btnGetLocation.IsEnabled = true;
-            btnToggleLocationUpdates.IsEnabled = true;
+                actIndGettingLocation.IsRunning = false;
+                actIndGettingLocation.IsVisible = false;
+                btnGetLocation.IsEnabled = true;
+                btnToggleLocationUpdates.IsEnabled = true;
+            }
+            catch (Exception ex)
+            {
+                string msg = $"Excepted Getting Location {Environment.NewLine}{ex}";
+                AddMessageToUI(msg, Color.Red);
+            }
         }
 
         private void UpdateUIWithNewPosition(Position position)
