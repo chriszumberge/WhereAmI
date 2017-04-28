@@ -26,6 +26,26 @@ namespace WhereAmI
 
             btnShowOnMap.Clicked += BtnShowOnMap_Clicked;
 
+            btnDisplayActions.Clicked += (async (s, e) =>
+            {
+                const string txtShowLocation = "Show Location On Map";
+                const string txtDumpApp = "Dump Application State";
+
+                var action = await MainPage.DisplayActionSheet("Actions", "Cancel", null, txtShowLocation, txtDumpApp);
+                switch (action)
+                {
+                    case txtShowLocation:
+                        await ShowCurrentLocationOnMap();
+                        break;
+                    case txtDumpApp:
+                        string appState = AddApplicationStateToMessage(String.Empty);
+                        AddMessageToUI(appState, Color.Aqua);
+                        break;
+                    default:
+                        break;
+                }
+            });
+
             geofenceManager.OnEnteredGeofence += GeofenceManager_OnEnteredGeofence;
             geofenceManager.OnExitedGeofence += GeofenceManager_OnExitedGeofence;
 
@@ -42,7 +62,7 @@ namespace WhereAmI
                     lblLocation,
                     lblHeading,
                     lblAddress,
-                    btnShowOnMap,
+                    //btnShowOnMap,
                     new StackLayout {
                         Orientation = StackOrientation.Horizontal,
                         HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -143,6 +163,11 @@ namespace WhereAmI
 
         private async void BtnShowOnMap_Clicked(object sender, EventArgs e)
         {
+            await ShowCurrentLocationOnMap();
+        }
+
+        private async System.Threading.Tasks.Task ShowCurrentLocationOnMap()
+        {
             try
             {
                 if (latestPosition == null)
@@ -218,34 +243,40 @@ namespace WhereAmI
             catch (Exception ex)
             {
                 string msg = $"Excepted On Entered Geofence {Environment.NewLine}{ex}";
+                msg = AddApplicationStateToMessage(msg);
 
-                var applicationState = GetApplicationState();
-                if (applicationState != null)
+                AddMessageToUI(msg, Color.Red);
+            }
+        }
+
+        private string AddApplicationStateToMessage(string msg)
+        {
+            var applicationState = GetApplicationState();
+            if (applicationState != null)
+            {
+                try
                 {
-                    try
+                    var appStateString = applicationState.PrintState();
+                    if (!String.IsNullOrEmpty(appStateString))
                     {
-                        var appStateString = applicationState.PrintState();
-                        if (!String.IsNullOrEmpty(appStateString))
-                        {
-                            msg = String.Concat(msg, Environment.NewLine, "Application State for Debugging:", Environment.NewLine, appStateString);
-                        }
-                        else
-                        {
-                            msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
-                        }
+                        msg = String.Concat(msg, Environment.NewLine, "Application State for Debugging:", Environment.NewLine, appStateString);
                     }
-                    catch
+                    else
                     {
                         msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
                     }
                 }
-                else
+                catch
                 {
                     msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
                 }
-
-                AddMessageToUI(msg, Color.Red);
             }
+            else
+            {
+                msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
+            }
+
+            return msg;
         }
 
         private void GeofenceManager_OnExitedGeofence(object sender, GeofenceExitedEventArgs e)
@@ -290,31 +321,7 @@ namespace WhereAmI
             {
                 
                 string msg = $"Excepted On Exited Geofence {Environment.NewLine}{ex}{Environment.NewLine}";
-
-                var applicationState = GetApplicationState();
-                if (applicationState != null)
-                {
-                    try
-                    {
-                        var appStateString = applicationState.PrintState();
-                        if (!String.IsNullOrEmpty(appStateString))
-                        {
-                            msg = String.Concat(msg, Environment.NewLine, "Application State for Debugging:", Environment.NewLine, appStateString);
-                        }
-                        else
-                        {
-                            msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
-                        }
-                    }
-                    catch
-                    {
-                        msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
-                    }
-                }
-                else
-                {
-                    msg = String.Concat(msg, Environment.NewLine, "Failed to dump application state for debugging.");
-                }
+                msg = AddApplicationStateToMessage(msg);
 
                 AddMessageToUI(msg, Color.Red);
             }
@@ -611,6 +618,12 @@ namespace WhereAmI
         Button btnToggleLocationUpdates = new Button
         {
             Text = "Start Updates",
+            HorizontalOptions = LayoutOptions.FillAndExpand
+        };
+
+        Button btnDisplayActions = new Button
+        {
+            Text = "Actions",
             HorizontalOptions = LayoutOptions.FillAndExpand
         };
 
