@@ -39,7 +39,7 @@ namespace WhereAmI
                         break;
                     case txtDumpApp:
                         string appState = AddApplicationStateToMessage(String.Empty);
-                        AddMessageToUI(appState, Color.Aqua);
+                        AddMessageToUI(appState, Color.Navy);
                         break;
                     default:
                         break;
@@ -119,7 +119,8 @@ namespace WhereAmI
                             }
                         }
                     },
-                    btnToggleLocationUpdates
+                    btnToggleLocationUpdates,
+                    btnDisplayActions
                 }
             };
 
