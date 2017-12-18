@@ -15,7 +15,37 @@ namespace WhereAmI.Debug
 
         static void Main(string[] args)
         {
-            ApplicationState debuggingAppState = new ApplicationState();
+            ApplicationState debuggingAppState = new ApplicationState()
+            {
+                LastFivePositions =
+                {
+                    new Position()
+                    {
+                        Latitude = 40.592968,
+                        Longitude = -75.544533
+                    },
+                    new Position()
+                    {
+                        Latitude = 40.593030,
+                        Longitude = -75.544619
+                    },
+                    new Position()
+                    {
+                        Latitude = 40.592474,
+                        Longitude = -75.546721
+                    },
+                    new Position()
+                    {
+                        Latitude = 40.591587,
+                        Longitude = -75.549815
+                    },
+                    new Position()
+                    {
+                        Latitude = 40.591058,
+                        Longitude =-75.553156
+                    }
+                }
+            };
 
             manager = new GeofenceManager();
             WhereAmI.Helpers.SubscribeGeofences(manager);
@@ -25,12 +55,16 @@ namespace WhereAmI.Debug
             IGeolocator mocklocator = new MockGeolocator();
             mocklocator.PositionChanged += Locator_PositionChanged;
 
+            mocklocator.StartListeningAsync(0, 0);
+
             foreach (var position in debuggingAppState.LastFivePositions)
             {
                 ((MockGeolocator)mocklocator).FeedPosition(position);
 
-                Thread.Sleep(1000);
+                //Thread.Sleep(1000);
             }
+
+            Console.ReadLine();
         }
 
         static Position latestPosition { get; set; }
@@ -120,7 +154,7 @@ namespace WhereAmI.Debug
             //});
             try
             {
-                if (e.Geofence is TollboothGeofence)
+                if (e.Geofence is TollboothGeofence)// && e.Geofence == lastEnteredTollBooth)
                 {
                     //lastEnteredTollBooth = e.Geofence as TollboothGeofence;
                     lastEnteredTollBooth = null;
